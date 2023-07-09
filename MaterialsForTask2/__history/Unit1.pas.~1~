@@ -1,0 +1,51 @@
+unit Unit1;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Data.FMTBcd,
+  Data.DB, Data.SqlExpr;
+
+type
+  TForm1 = class(TForm)
+    ListView1: TListView;
+    Button1: TButton;
+    Query1: TSQLQuery;
+    Query2: TSQLQuery;
+    procedure Button1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  Query1.close; {Деактивируем запрос в качестве одной из мер предосторожности }
+  Query1.SQL.Clear; {Стираем любой предыдущий запрос}
+  Query1.SQL.Add('SELECT * FROM wifes'); {Назначаем свойству SQL текст Memo}
+
+  Query2.close; {Деактивируем запрос в качестве одной из мер предосторожности }
+  Query2.SQL.Clear; {Стираем любой предыдущий запрос}
+  Query2.SQL.Add('SELECT * FROM husbands'); {Назначаем свойству SQL текст Memo}
+
+  try        {перехватчик ошибок}
+    Query1.Open;     {Выполняем запрос и открываем набор данных}
+    Query2.Open;
+    except     {секция обработки ошибок}
+    On e : EDatabaseError do {e - новый дескриптор ошибки}
+    messageDlg(e.message,
+    mtError,
+    [mbOK],0); {показываем свойство message объекта e}
+  end;      {окончание обработки ошибки}
+end;
+
+end.
