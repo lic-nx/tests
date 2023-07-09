@@ -1,0 +1,101 @@
+unit Unit1;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Data.FMTBcd,
+  Data.DB, Data.SqlExpr;
+
+type
+  TForm1 = class(TForm)
+    ListView1: TListView;
+    Button1: TButton;
+    Query1: TSQLQuery;
+    Query2: TSQLQuery;
+    procedure Button1Click(Sender: TObject);
+
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+  LI:TlistItem;
+  i:integer;
+
+implementation
+
+{$R *.dfm}
+
+type
+  TPerson = record
+    id: integer;
+    name: string;
+    age: integer;
+    height: integer;
+    weight: integer;
+    minAge: integer;
+    maxAge: integer;
+    minHeight: integer;
+    maxHeight: integer;
+    minWeight: integer;
+    maxWeight: integer;
+  end;
+
+type
+  TPersonList = array of TPerson;
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  Query1.close; {Деактивируем запрос в качестве одной из мер предосторожности }
+  Query1.SQL.Clear; {Стираем любой предыдущий запрос}
+  Query1.SQL.Add('SELECT * FROM wifes'); {Назначаем свойству SQL текст Memo}
+
+  Query2.close; {Деактивируем запрос в качестве одной из мер предосторожности }
+  Query2.SQL.Clear; {Стираем любой предыдущий запрос}
+  Query2.SQL.Add('SELECT * FROM husbands'); {Назначаем свойству SQL текст Memo}
+
+  try        {перехватчик ошибок}
+    Query1.Open;     {Выполняем запрос и открываем набор данных}
+    Query2.Open;
+    except     {секция обработки ошибок}
+    On e : EDatabaseError do {e - новый дескриптор ошибки}
+    messageDlg(e.message,
+    mtError,
+    [mbOK],0); {показываем свойство message объекта e}
+  end;      {окончание обработки ошибки}
+
+  var arr: TPersonList;
+  SetLength(arr, Query2.RecordCount);
+  var i := 1;
+  Query2.First;
+  While Query2.Eof do
+  begin
+   arr[i].id := Query2.FieldByName('id').AsInteger;
+   arr[i].name := Query2.FieldByName('name').AsString;
+   arr[i].age := Query2.FieldByName('age').AsInteger;
+   arr[i].height := Query2.FieldByName('height').AsInteger;
+   arr[i].weight := Query2.FieldByName('weight').AsInteger;
+   arr[i].minAge := Query2.FieldByName('minAge').AsInteger;
+   arr[i].maxAge := Query2.FieldByName('maxAge').AsInteger;
+   arr[i].minHeight:=Query2.FieldByName('minHeight').AsInteger;
+   arr[i].maxHeight:=Query2.FieldByName('maxHeight').AsInteger;
+   arr[i].minWeight:=Query2.FieldByName('minWeight').AsInteger;
+   arr[i].maxWeight:=Query2.FieldByName('maxWeight').AsInteger;
+   Query2.Next;
+   i := i + 1;
+  end;
+
+  While Query1.eof do //21
+  begin
+  LI:=ListView1.Items.add;
+//  Li.Caption:='#'+IntToStr(i);         //0 column
+  Li.SubItems.Add(Query1.Text); //1 column
+  Li.SubItems.Add('#'+IntToStr(i)); //2 column
+  end;
+end;
+
+end.
